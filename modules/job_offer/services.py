@@ -6,6 +6,40 @@ def get_all_job_offers():
     return JobOffer.query.order_by(JobOffer.created_at.desc()).all()
 
 def get_active_job_offers():
+    """Fetch active job offers directly from Supabase REST API first, fallback to SQLite"""
+    try:
+        import os, requests
+        supabase_url = os.getenv("SUPABASE_URL")
+        supabase_key = os.getenv("SUPABASE_KEY")
+        if supabase_url and supabase_key:
+            headers = {"apikey": supabase_key, "Authorization": f"Bearer {supabase_key}"}
+            res = requests.get(
+                f"{supabase_url}/rest/v1/job_offers?status=eq.active&order=created_at.desc",
+                headers=headers,
+                timeout=4
+            )
+            if res.status_code == 200 and res.json():
+                items = res.json()
+                jobs = []
+                for item in items:
+                    j = JobOffer()
+                    j.id = item.get('id')
+                    j.title = item.get('title')
+                    j.title_ar = item.get('title_ar') or item.get('title')
+                    j.location = item.get('location') or 'Tripoli, Libya'
+                    j.location_ar = item.get('location_ar') or 'طرابلس، ليبيا'
+                    j.employment_type = item.get('employment_type') or 'Full-time'
+                    j.category = item.get('category')
+                    j.specialty = item.get('specialty')
+                    j.description = item.get('description')
+                    j.description_ar = item.get('description_ar')
+                    j.requirements = item.get('requirements')
+                    j.requirements_ar = item.get('requirements_ar')
+                    j.status = item.get('status', 'active')
+                    jobs.append(j)
+                return jobs
+    except Exception:
+        pass
     return JobOffer.query.filter_by(status='active').order_by(JobOffer.created_at.desc()).all()
 
 def get_job_offer_by_id(job_id):
