@@ -256,12 +256,6 @@ def make_session_permanent():
     session.permanent = True
 
 # Routes
-@app.route('/')
-def index():
-    if current_user.is_authenticated:
-        logout_user()
-    return redirect(url_for('auth.login'))
-
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
