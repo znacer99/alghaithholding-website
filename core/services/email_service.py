@@ -138,6 +138,10 @@ class EmailService:
     
     def send_email(self, from_email, to_email, subject, html_body):
         """Generic email sender using SMTP with SSL"""
+        if not self.smtp_email or not self.smtp_password:
+            logger.warning(f"⚠️ SMTP credentials not configured (SMTP_PASSWORD missing). Skipping email to {to_email}.")
+            return False
+
         try:
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
