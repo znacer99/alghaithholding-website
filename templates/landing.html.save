@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="{{ session.get('lang', 'en') }}">
+<head>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon-new.ico') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if session.get('lang', 'en') == 'ar' %}مجموعة الغيث العالمية{% else %}ALGHAITH Int Group{% endif %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7fa;
+        }
+        
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+        
+        /* Animation Classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .slide-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .scale-in {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.6s ease-out;
+        }
+        
+        .scale-in.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .stagger-delay-1 { transition-delay: 0.1s; }
+        .stagger-delay-2 { transition-delay: 0.2s; }
+        .stagger-delay-3 { transition-delay: 0.3s; }
+        .stagger-delay-4 { transition-delay: 0.4s; }
+        .stagger-delay-5 { transition-delay: 0.5s; }
+        
+        /* Navbar Styles - Previous Style */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 2rem;
+            background-color: #2c3e50;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            padding: 0.8rem 2rem;
+            background-color: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .logo-image {
+            height: 60px;
+            width: auto;
+            max-width: 150px;
+            object-fit: contain;
+            background: white;
+            padding: 1px;
+            border-radius: 10px;
+            border: 1px solid white;
+            transition: transform 0.3s ease;
+            display:block;
+        }
+        
+        .logo-image:hover {
+            transform: scale(1.05);
+        }
+        
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #3498db;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .nav-links a:hover {
+            color: #3498db;
+        }
+        
+        .btn-login {
+            background-color: #3498db;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-login:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Language Switcher */
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            margin-right: 1rem;
+        }
+        
+        .language-switcher form {
+            margin: 0;
+        }
+        
+        .language-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .language-select:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* RTL Support for Arabic */
+        [dir="rtl"] .navbar,
+        [dir="rtl"] .nav-links,
+        [dir="rtl"] .about-cards,
+        [dir="rtl"] .jobs-container,
+        [dir="rtl"] .application-container,
+        [dir="rtl"] .collaborate-grid,
+        [dir="rtl"] .contact-info {
+            text-align: right;
+            direction: rtl;
+        }
+
+        [dir="rtl"] .nav-links {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        [dir="rtl"] .language-switcher {
+            margin-left: 1rem;
+            margin-right: auto;
+        }
+        
+        /* Hero Section - Updated to solid blue */
+        .hero {
+            background-color: #1e40af; /* Solid blue background */
+            color: white;
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(30, 64, 175, 0.8) 0%, rgba(37, 99, 235, 0.6) 100%);
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .hero-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .btn-primary {
+            display: inline-block;
+            background-color: #e74c3c;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-primary:hover:before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* About Section - Previous Style */
+        .about-cards {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .about-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            flex: 1;
+            min-width: 250px;
+            max-width: 350px;
+            transition: all 0.3s ease;
+            border-top: 4px solid #3498db;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .about-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: #3498db;
+            transition: height 0.3s ease;
+            z-index: 0;
+        }
+        
+        .about-card:hover:before {
+            height: 100%;
+        }
+        
+        .about-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        .about-card:hover h3,
+        .about-card:hover p {
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .about-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            transition: color 0.3s ease;
+        }
+        
+        .about-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+        
+        .first-row, .second-row {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .second-row {
+            margin-top: 2rem;
+        }
+        
+        /* Jobs Section - Previous Style */
+        .jobs {
+            background-color: #ecf0f1;
+        }
+        
+        .jobs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .job-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .job-header {
+            padding: 1.8rem;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+B        }
+        
+        .job-header h3 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+        }
+        
+        .job-badge {
+            background-color: #3498db;
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .job-card:hover .job-badge {
+            background-color: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .job-details {
+            padding: 1.8rem;
+        }
+        
+        .job-info {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.2rem;
+B        }
+        
+        .job-location, .job-department {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .job-details p {
+            margin-bottom: 1.2rem;
+            color: #5a6c7d;
+            line-height: 1.6;
+        }
+        
+        .job-responsibilities {
+            list-style-type: none;
+            margin-top: 1.2rem;
+        }
+        
+        .job-responsibilities li {
+            padding: 0.4rem 0;
+            color: #5a6c7d;
+            position: relative;
+            padding-left: 1.5rem;
+            transition: color 0.3s ease;
+        }
+        
+ B       .job-card:hover .job-responsibilities li {
+            color: #2c3e50;
+        }
+        
+        .job-responsibilities li:before {
+            content: "•";
+            color: #3498db;
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0;
+            transition: color 0.3s ease;
+        }
+        
+        .job-card:hover .job-responsibilities li:before {
+            color: #2980b9;
+        }
+        
+        [dir="rtl"] .job-responsibilities li {
+            padding-left: 0;
+            padding-right: 1.5rem;
+        }
+        
+        [dir="rtl"] .job-responsibilities li:before {
+            left: auto;
+            right: 0;
+        }
+        
+        .job-footer {
+            padding: 1.5rem 1.8rem;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .btn-apply-now {
+            display: inline-block;
+            background-color: #2ecc71;
+            color: white;
+            padding: 0.7rem 1.8rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-apply-now:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-apply-now:hover:before {
+            left: 100%;
+        }
+        
+        .btn-apply-now:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Application Form - Updated */
+        .application-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+  B      .application-form {
+            background: white;
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .application-form:hover {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .form-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3498db;
+            display: inline-block;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            flex: 1;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.7rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.9rem;
+            border: 1px solid #dce4ec;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .full-width {
+            flex: 0 0 100%;
+        }
+        
+        .form-actions {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .btn-submit {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-submit:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-submit:hover:before {
+            left: 100%;
+        }
+        
+        .btn-submit:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .application-info {
+            background: white;
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            transition: all 0.3s ease;
+        }
+        
+B        .application-info:hover {
+B            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .application-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3498db;
+            display: inline-block;
+        }
+        
+        .process-steps {
+            margin-top: 2rem;
+ B       }
+        
+        .process-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .process-step:hover {
+            transform: translateX(5px);
+        }
+        
+        [dir="rtl"] .process-step:hover {
+            transform: translateX(-5px);
+        }
+        
+        .step-number {
+            background-color: #3498db;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 1.2rem;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .process-step:hover .step-number {
+            background-color: #2980b9;
+            transform: scale(1.1);
+        }
+        
+        [dir="rtl"] .process-step {
+            flex-direction: row-reverse;
+        }
+        
+        [dir="rtl"] .step-number {
+            margin-right: 0;
+            margin-left: 1.2rem;
+        }
+        
+        .step-content h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .step-content p {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        .contact-recruitment {
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .contact-recruitment h4 {
+            margin-bottom: 0.7rem;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .contact-recruitment a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-recruitment a:hover {
+            text-decoration: underline;
+            color: #2980b9;
+        }
+        
+        /* Collaborate Section - Styled to match previous style */
+        .collaborate {
+            background-color: #ecf0f1;
+            padding: 5rem 0;
+        }
+        
+        .collaborate-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }A
+        
+        .collaborate-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            text-align: center;
+            border-top: 4px solid #3498db;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .collaborate-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0;
+            background: #3498db;
+            transition: height 0.3s ease;
+            z-index: 0;
+        }
+        
+        .collaborate-card:hover:before {
+            height: 100%;
+        }
+        
+        .collaborate-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        .collaborate-card:hover .collaborate-icon,
+        .collaborate-card:hover h3,
+        .collaborate-card:hover p {
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .collaborate-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #3498db;
+            transition: all 0.3s ease;
+        }
+        
+        .collaborate-card:hover .collaborate-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .collaborate-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            color: #2c3e50;
+            transition: color 0.3s ease;
+        }
+        
+        .collaborate-card p {
+            color: #7f8c8d;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+        
+        /* Contact Section - Previous Style */
+        .contact {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+        }
+        
+        .contact h2 {
+            color: white;
+        }
+        
+ B       .contact .section-subtitle {
+            color: #bdc3c7;
+        }
+        
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            text-align: left;
+        }
+        
+        [dir="rtl"] .contact-info {
+            text-align: right;
+        }
+        
+        .contact-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 2rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .contact-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: #3498db;
+        }
+        
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-item:hover {
+            transform: translateX(5px);
+        }
+        
+        [dir="rtl"] .contact-item:hover {
+            transform: translateX(-5px);
+        }
+        
+        .contact-item i {
+            width: 20px;
+            color: #3498db;
+            margin-top: 0.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-item:hover i {
+            color: #2980b9;
+            transform: scale(1.1);
+        }
+        
+        .contact-item a {
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .contact-item a:hover {
+            color: #3498db;
+        }
+        
+        .location-map {
+            margin-top: 3rem;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 300px;
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #bdc3c7;
+            flex-direction: column;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .location-map:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .location-map i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #3498db;
+            transition: all 0.3s ease;
+        }
+        
+        .location-map:hover i {
+            transform: scale(1.1);
+        }
+        
+        /* Footer - Previous Style */
+        .footer {
+            background-color: #34495e;
+            color: #bdc3c7;
+            text-align: center;
+            padding: 2.5rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                margin-top: 1.5rem;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .language-switcher {
+                margin: 1rem 0 0 0;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .about-cards, .first-row, .second-row {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .application-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .contact-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .collaborate-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+            /* Success Notification */
+            .success-notification {
+                background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+                border-radius: 8px;
+                padding: 1.5rem;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+                border-left: 5px solid #27ae60;
+            }
+
+            .success-content {
+                display: flex;
+                align-items: flex-start;
+                gap: 1.5rem;
+                color: white;
+            }
+
+            .success-content i {
+                font-size: 2rem;
+                flex-shrink: 0;
+                margin-top: 0.3rem;
+            }
+
+            .success-content h4 {
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+            }
+
+            .success-content p {
+                margin: 0;
+                opacity: 0.95;
+                font-size: 0.95rem;
+            }
+
+            @media (max-width: 768px) {
+            .success-notification {
+                padding: 1.2rem;
+            }
+    
+            .success-content {
+                gap: 1rem;
+            }
+    
+    .success-content i {
+        font-size: 1.5rem;
+    }
+}
+    </style>
+</head>
+<body dir="{{ 'rtl' if session.get('lang', 'en') == 'ar' else 'ltr' }}">
+<!-- Navbar -->
+<nav class="navbar">
+    <!-- Logo SecAtion -->
+    <div class="logo">
+        <img src="{{ url_for('static', filename='images/LOGO_ALGHAITH.png') }}" 
+             alt="Alghaith International Group" 
+             class="logo-image">
+        <span class="logo-text">{% if session.get('lang', 'en') == 'ar' %}مجموعة الغيث العالمية{% else %}ALGHAITH Int Group{% endif %}</span>
+    </div>
+    
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <form method="POST" action="{{ url_for('lang.set_language') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="lang" class="language-select" onchange="this.form.submit()">
+                <option value="en" {% if session.get('lang', 'en') == 'en' %}selected{% endif %}>English</option>
+                <option value="ar" {% if session.get('lang', 'en') == 'ar' %}selected{% endif %}>العربية</option>
+            </select>
+        </form>
+    </div>
+    
+    <ul class="nav-links">
+        <li><a href="#about">{% if session.get('lang', 'en') == 'ar' %}من نحن{% else %}About{% endif %}</a></li>
+        <li><a href="#jobs">{% if session.get('lang', 'en') == 'ar' %}الوظائف الشاغرة{% else %}Job Openings{% endif %}</a></li>
+        <li><a href="#apply">{% if session.get('lang', 'en') == 'ar' %}قدم الآن{% else %}Apply Now{% endif %}</a></li>
+        <li><a href="#collaborate">{% if session.get('lang', 'en') == 'ar' %}تعاون معنا{% else %}Collaborate{% endif %}</a></li>
+        <li><a href="#contact">{% if session.get('lang', 'en') == 'ar' %}اتصل بنا{% else %}Contact{% endif %}</a></li>
+        <li><a href="{{ url_for('auth.login') }}" class="btn-login">{% if session.get('lang', 'en') == 'ar' %}تسجيل الدخول{% else %}Login{% endif %}</a></li>
+    </ul>
+</nav>
+
+ <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content fade-in">
+            <h1>{% if session.get('lang', 'en') == 'ar' %}مجموعة الغيث العالمية{% else %}ALGHAITH International Group{% endif %}</h1>
+            <p>{% if session.get('lang', 'en') == 'ar' %} للموارد البشرية والخدمات الصناعية {% else %}Human Resources and Industrial Services. {% endif %}</p>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="section">
+        <h2 class="fade-in">{% if session.get('lang', 'en') == 'ar' %}من نحن{% else %}About Us{% endif %}</h2>
+
+        <!-- First row: 3 cards -->
+        <div class="about-cards first-row">
+            <div class="about-card fade-in stagger-delay-1">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}الغيث للموارد البشرية ليبيا{% else %}ALGHAITH Human Resources Libya{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}تقديم حلول مبتكرة للموارد البشرية في ليبيا{% else %}Providing innovative HR solutions in Libya.{% endif %}</p>
+            </div>
+            <div class="about-card fade-in stagger-delay-2">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}الغيث للموارد البشرية تونس{% else %}ALGHAITH Human Resources Tunisia{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}تقديم خدمات شاملة للموارد البشرية في تونس{% else %}Delivering comprehensive HR services in Tunisia.{% endif %}</p>
+            </div>
+            <div class="about-card fade-in stagger-delay-3">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}الغيث للمقاولات والعقارات{% else %}ALGHAITH Contracting & Real Estates{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}خدمات احترافية في البناء وإدارة العقارات{% else %}Expert construction and real estate management services.{% endif %}</p>
+            </div>
+        </div>
+
+        <!-- Second row: 2 cards, centered -->
+        <div class="about-cards second-row">
+            <div class="about-card fade-in stagger-delay-4">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}الغيث لخدمات النفط والغاز{% else %}ALGHAITH OIL & Gas Services{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}خدمات احترافية في صناعة النفط والغاز{% else %}Professional oil and gas industry services.{% endif %}</p>
+            </div>
+            <div class="about-card fade-in stagger-delay-5">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}الغيث للصناعات المعدنية{% else %}ALGHAITH Metal Industries{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}حلول صناعية وتصنيع معدني عالي الجودة{% else %}Quality metal manufacturing and industrial solutions.{% endif %}</p>
+            </div>
+        </div>
+    </section>
+
+<!-- Job Openings Section -->
+<section id="jobs" class="section jobs">
+    <h2 class="fade-in">{% if session.get('lang', 'en') == 'ar' %}الوظائف الشاغرة الحالية{% else %}Current Job Openings{% endif %}</h2>
+    <p class="section-subtitle fade-in">{% if session.get('lang', 'en') == 'ar' %}انضم إلى فريقنا المتنامي من المحترفين{% else %}Join our growing team of professionals{% endif %}</p>
+    
+    <div class="jobs-container">
+        <div class="job-card fade-in stagger-delay-1">
+            <div class="job-header">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}مهندس برمجيات كبير{% else %}Senior Software Engineer{% endif %}</h3>
+                <span class="job-badge">{% if session.get('lang', 'en') == 'ar' %}دوام كامل{% else %}Full-time{% endif %}</span>
+            </div>
+            <div class="job-details">
+                <div class="job-info">
+                    <span class="job-location">{% if session.get('lang', 'en') == 'ar' %}طرابلس، ليبيا{% else %}Tripoli, Libya{% endif %}</span>
+                    <span class="job-department">{% if session.get('lang', 'en') == 'ar' %}التقنية{% else %}Technology{% endif %}</span>
+                </div>
+                <p>{% if session.get('lang', 'en') == 'ar' %}نبحث عن مهندس برمجيات ذو خبرة للانضمام إلى فريقنا التقني المتنامي والمساعدة في بناء حلول مبتكرة للموارد البشرية{% else %}We're looking for an experienced software engineer to join our growing tech team and help build innovative HR solutions.{% endif %}</p>
+                <ul class="job-responsibilities">
+                    <li>{% if session.get('lang', 'en') == 'ar' %}تصميم وتطوير تطبيقات ويب قابلة للتوسع{% else %}Design and develop scalable web applications{% endif %}</li>
+                    <li>{% if session.get('lang', 'en') == 'ar' %}التعاون مع فرق المنتج والتصميم{% else %}Collaborate with product and design teams{% endif %}</li>
+                    <li>{% if session.get('lang', 'en') == 'ar' %}إرشاد المطورين المبتدئين{% else %}Mentor junior developers{% endif %}</li>
+                </ul>
+            </div>
+            <div class="job-footer">
+                <a href="#apply" class="btn-apply-now">{% if session.get('lang', 'en') == 'ar' %}قدم الآن{% else %}Apply Now{% endif %}</a>
+            </div>
+        </div>
+        
+        <div class="job-card fade-in stagger-delay-2">
+            <div class="job-header">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}مساعد ميكانيكي - توظيف عاجل{% else %}Mechanical Installer Helper - Urgent Hiring{% endif %}</h3>
+                <span class="job-badge" style="background-color: #e74c3c;">{% if session.get('lang', 'en') == 'ar' %}عاجل{% else %}Urgent{% endif %}</span>
+            </div>
+            <div class="job-details">
+                <div class="job-info">
+                    <span class="job-location">{% if session.get('lang', 'en') == 'ar' %}طرابلس، ليبيا{% else %}Tripoli, Libya{% endif %}</span>
+                    <span class="job-department">{% if session.get('lang', 'en') == 'ar' %}الميكانيكية{% else %}Mechanical{% endif %}</span>
+                </div>
+                <p>{% if session.get('lang', 'en') == 'ar' %}نبحث عن مساعد ميكانيكي للانضمام إلى فريقنا بشكل عاجل! البدء فوري.{% else %}We are urgently looking for a Mechanical Installer Helper to join our team! Immediate start.{% endif %}</p>
+                <ul class="job-responsibilities">
+                    <li>{% if session.get('lang', 'en') == 'ar' %}معرفة أساسية في التركيبات الميكانيكية{% else %}Basic knowledge in mechanical installation{% endif %}</li>
+                    <li>{% if session.get('lang', 'en') == 'ar' %}القدرة على استخدام الأدوات اليدوية واتباع تعليمات المشرف{% else %}Able to use hand tools and follow supervisor instructions{% endif %}</li>
+                    <li>{% if session.get('lang', 'en') == 'ar' %}الجدية في العمل والاستعداد الفوري للبدء{% else %}Hardworking, serious, and ready to start immediately{% endif %}</li>
+  B              </ul>
+            </div>
+            <div class="job-footer">
+                <a href="#apply" class="btn-apply-now">{% if session.get('lang', 'en') == 'ar' %}قدم الآن{% else %}Apply Now{% endif %}</a>
+            </div>
+        </div>
+        
+        <div class="job-card fade-in stagger-delay-3">
+            <div class="job-header">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}مدير مشاريع{% else %}Project Manager{% endif %}</h3>
+                <span class="job-badge">{% if session.get('lang', 'en') == 'ar' %}عقد{% else %}Contract{% endif %}</span>
+            </div>
+            <div class="job-details">
+                <div class="job-info">
+                    <span class="job-location">{% if session.get('lang', 'en') == 'ar' %}بنغازي، ليبيا{% else %}Benghazi, Libya{% endif %}</span>
+                    <span class="job-department">{% if session.get('lang', 'en') == 'ar' %}العمليات{% else %}Operations{% endif %}</span>
+                </div>
+                <p>{% if session.get('lang', 'en') == 'ar' %}نحتاج إلى مدير مشاريع ذو خبرة للإشراف على المبادرات الرئيسية وضمان التسليم الناجح للمشاريع{% else %}We need an experienced Project Manager to oversee key initiatives and ensure successful delivery of projects.{% endif %}</p>
+                <ul class="job-responsibilities">
+                    <li>{% if session.get('lang', 'en') == 'ar' %}تخطيط وتنفيذ المشاريع من conception to completion{% else %}Plan and execute projects from conception to completion{% endif %}</li>
+                    <li>{% if session.get('lang', 'en') == 'ar' %}إدارة الميزانيات والجداول الزمنية والموارد{% else %}Manage budgets, timelines, and resources{% endif %}</li>
+                    <li>{% if session.get('lang', 'en') == 'ar' %}تنسيق الفرق الوظيفية المتقاطعة{% else %}Coordinate cross-functional teams{% endif %}</li>
+                </ul>
+            </div>
+            <div class="job-footer">
+                <a href="#apply" class="btn-apply-now">{% if session.get('lang', 'en') == 'ar' %}قدم الآن{% else %}Apply Now{% endif %}</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Application Form Section -->
+    <section id="apply" class="section apply">
+        <h2 class="fade-in">{% if session.get('lang', 'en') == 'ar' %}قدم على الوظيفة{% else %}Apply for a Position{% endif %}</h2>
+        <p class="section-subtitle fade-in">{% if session.get('lang', 'en') == 'ar' %}أرسل طلبك للانضمام إلى فريقنا{% else %}Submit your application to join our team{% endif %}</p>
+        
+        <div class="application-container">
+            <form class="application-form fade-in stagger-delay-1" id="applicationForm"
+                  action="{{ url_for('candidates.public_apply') }}"
+                  method="POST" enctype="multipart/form-data">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="form-section">
+                    <h3>{% if session.get('lang', 'en') == 'ar' %}المعلومات الشخصية{% else %}Personal Information{% endif %}</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="full_name">{% if session.get('lang', 'en') == 'ar' %}الاسم الكامل *{% else %}Full Name *{% endif %}</label>
+                            <input type="text" id="full_name" name="full_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">{% if session.get('lang', 'en') == 'ar' %}البريد الإلكتروني *{% else %}Email Address *{% endif %}</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">{% if session.get('lang', 'en') == 'ar' %}رقم الهاتف *{% else %}Phone Number *{% endif %}</label>
+                            <input type="tel" id="phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nationality">{% if session.get('lang', 'en') == 'ar' %}الجنسية{% else %}Nationality{% endif %}</label>
+                            <input type="text" id="nationality" name="nationality" placeholder="{% if session.get('lang', 'en') == 'ar' %}جنسيتك{% else %}Your nationality{% endif %}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="applied_position">{% if session.get('lang', 'en') == 'ar' %}الوظيفة المتقدم لها *{% else %}Position Applying For *{% endif %}</label>
+                            <select id="applied_position" name="applied_position" required>
+                                <option value="">{% if session.get('lang', 'en') == 'ar' %}اختر الوظيفة{% else %}Select a position{% endif %}</option>
+                                <option value="Engineer">{% if session.get('lang', 'en') == 'ar' %}مهندس{% else %}Engineer{% endif %}</option>
+                                <option value="Technician">{% if session.get('lang', 'en') == 'ar' %}فني{% else %}Technician{% endif %}</option>
+                                <option value="Helper">{% if session.get('lang', 'en') == 'ar' %}مساعد{% else %}Helper{% endif %}</option>
+                                <option value="Unskilled Worker">{% if session.get('lang', 'en') == 'ar' %}عامل غير ماهر{% else %}Unskilled Worker{% endif %}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SPECIALTY DROPDOWN -->
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label for="specialty">{% if session.get('lang', 'en') == 'ar' %}التخصص *{% else %}Specialty *{% endif %}</label>
+                            <select id="specialty" name="specialty" required class="form-group" style="padding: 0.9rem; border: 1px solid #dce4ec; border-radius: 4px; font-family: 'Inter', sans-serif;">
+                                <option value="">{% if session.get('lang', 'en') == 'ar' %}اختر التخصص{% else %}Select a specialty{% endif %}</option>
+                                {% for specialty in specialties %}
+                                <option value="{{ specialty }}">{{ specialty }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                
+                <div class="form-section">
+                    <h3>{% if session.get('lang', 'en') == 'ar' %}الخلفية المهنية{% else %}Professional Background{% endif %}</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="experience">{% if session.get('lang', 'en') == 'ar' %}سنوات الخبرة{% else %}Years of Experience{% endif %}</label>
+                            <select id="experience" name="experience">
+                                <option value="">{% if session.get('lang', 'en') == 'ar' %}اختر الخبرة{% else %}Select experience{% endif %}</option>
+                                <option value="0-2">{% if session.get('lang', 'en') == 'ar' %}0-2 سنوات{% else %}0-2 years{% endif %}</option>
+                                <option value="3-5">{% if session.get('lang', 'en') == 'ar' %}3-5 سنوات{% else %}3-5 years{% endif %}</option>
+                                <option value="6-10">{% if session.get('lang', 'en') == 'ar' %}6-10 سنوات{% else %}6-10 years{% endif %}</option>
+                                <option value="10+">{% if session.get('lang', 'en') == 'ar' %}10+ سنوات{% else %}10+ years{% endif %}</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="education">{% if session.get('lang', 'en') == 'ar' %}أعلى مؤهل علمي{% else %}Highest Education{% endif %}</label>
+                            <select id="education" name="education">
+                                <option value="">{% if session.get('lang', 'en') == 'ar' %}اختر المؤهل{% else %}Select education{% endif %}</option>
+                                <option value="High School">{% if session.get('lang', 'en') == 'ar' %}الثانوية العامة{% else %}High School{% endif %}</option>
+                                <option value="Bachelor's">{% if session.get('lang', 'en') == 'ar' %}بكالوريوس{% else %}Bachelor's Degree{% endif %}</option>
+                                <option value="Master's">{% if session.get('lang', 'en') == 'ar' %}ماجستير{% else %}Master's Degree{% endif %}</option>
+                                <option value="PhD">{% if session.get('lang', 'en') == 'ar' %}دكتوراه{% else %}PhD{% endif %}</option>
+                            </select>
+                A        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="skills">{% if session.get('lang', 'en') == 'ar' %}المهارات والمؤهلات الرئيسية{% else %}Key Skills & Qualifications{% endif %}</label>
+                        <textarea id="skills" name="skills" rows="3" placeholder="{% if session.get('lang', 'en') == 'ar' %}اذكر مهاراتك ومؤهلاتك ذات الصلة...{% else %}List your relevant skills and qualifications...{% endif %}"></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3>{% if session.get('lang', 'en') == 'ar' %}مستندات التقديم{% else %}Application Materials{% endif %}</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="resume">{% if session.get('lang', 'en') == 'ar' %}رفع السيرة الذاتية (PDF) *{% else %}Upload Resume/CV (PDF) *{% endif %}</label>
+                            <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                        </div>
+                        <!-- UPDATED: ID Document is now required -->
+                        <div class="form-group">
+                            <label for="id_document">{% if session.get('lang', 'en') == 'ar' %}وثيقة الهوية *{% else %}ID Document *{% endif %}</label>
+                            <input type="file" id="id_document" name="id_document" accept=".pdf,.doc,.docx,.jpg,.png" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SUCCESS MESSAGE NOTIFICATION -->
+                {% if request.args.get('submitted') == 'success' %}
+                <div class="success-notification fade-in" id="successMessage">
+                    <div class="success-content">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <h4>{% if session.get('lang', 'en') == 'ar' %}تم إرسال طلبك بنجاح!{% else %}Application Submitted Successfully!{% endif %}</h4>
+                            <p>{% if session.get('lang', 'en') == 'ar' %}شكراً لتقديمك. سيتم التواصل معك قريباً.{% else %}Thank you for your application. We'll be in touch soon.{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">{% if session.get('lang', 'en') == 'ar' %}إرسال الطلب{% else %}Submit Application{% endif %}</button>
+                </div>
+            </form>
+            
+            <div class="application-info fade-in stagger-delay-2">
+                <h3>{% if session.get('lang', 'en') == 'ar' %}عملية التقديم{% else %}Application Process{% endif %}</h3>
+                <div class="process-steps">
+                    <div class="process-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>{% if session.get('lang', 'en') == 'ar' %}أرسل طلبك{% else %}Submit Your Application{% endif %}</h4>
+                            <p>{% if session.get('lang', 'en') == 'ar' %}أكمل النموذج وقم برفع سيرتك الذاتية{% else %}Complete the form and upload your resume{% endif %}</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>{% if session.get('lang', 'en') == 'ar' %}عملية المراجعة{% else %}Review Process{% endif %}</h4>
+                            <p>{% if session.get('lang', 'en') == 'ar' %}سيقوم فريقنا بمراجعة طلبك{% else %}Our HR team will review your application{% endif %}</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>{% if session.get('lang', 'en') == 'ar' %}المقابلة{% else %}Interview{% endif %}</h4>
+                            <p>{% if session.get('lang', 'en') == 'ar' %}سيتم الاتصال بالمرشحين المختارين لإجراء المقابلات{% else %}Selected candidates will be contacted for interviews{% endif %}</p>
+                        </div>
+                    </div>
+                    <div class="process-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>{% if session.get('lang', 'en') == 'ar' %}العرض{% else %}Offer{% endif %}</h4>
+                            <p>{% if session.get('lang', 'en') == 'ar' %}سيحصل المرشحون الناجحون على عرض عمل{% else %}Successful candidates will receive a job offer{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-recruitment">
+   B                 <h4>{% if session.get('lang', 'en') == 'ar' %}أسئلة حول التوظيف؟{% else %}Questions About Recruitment?{% endif %}</h4>
+                    <p>{% if session.get('lang', 'en') == 'ar' %}راسل فريق الموارد البشرية على:{% else %}Email our HR team at:{% endif %} <a href="mailto:HR@alghaithcompanies.group">HR@alghaithcompanies.group</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collaborate Section (Replaces Features) -->
+    <section id="collaborate" class="section collaborate">
+        <h2 class="fade-in">{% if session.get('lang', 'en') == 'ar' %}تعاون معنا{% else %}Collaborate With Us{% endif %}</h2>
+        <p class="section-subtitle fade-in">{% if session.get('lang', 'en') == 'ar' %}اكتشف طرقًا مختلفة للتعاون مع مجموعة الغيث العالمية{% else %}Discover different ways to collaborate with ALGHAITH International Group{% endif %}</p>
+        
+        <div class="collaborate-grid">
+            <div class="collaborate-card fade-in stagger-delay-1">
+                <div class="collaborate-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3>{% if session.get('lang', 'en') == 'ar' %}شراكات الأعمال{% else %}Business Partnerships{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}تعاون معنا لإنشاء شراكات استراتيجية تعود بالنفع المتبادل على جميع الأطراف{% else %}Collaborate with us to create strategic partnerships that benefit all parties involved.{% endif %}</p>
+            </div>
+            
+            <div class="collaborate-card fade-in stagger-delay-2">
+                <div class="collaborate-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>{% if session.get('lang', 'en') == 'ar' %}الاستعانة بالخبرات{% else %}Expert Consultation{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}استفد من خبراتنا الواسعة في مجالات الموارد البشرية والخدمات الصناعية{% else %}Leverage our extensive expertise in HR and industrial services for your projects.{% endif %}</p>
+            </div>
+            
+            <div class="collaborate-card fade-in stagger-delay-3">
+                <div class="collaborate-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3>{% if session.get('lang', 'en') == 'ar' %}المشاريع المشتركة{% else %}Joint Projects{% endif %}</h3>
+                <p>{% if session.get('lang', 'en') == 'ar' %}انضم إلينا في مشاريع مشتركة تجمع بين مواردنا وخبراتنا لتحقيق أهداف مشتركة{% else %}Join us in joint projects that combine our resources and expertise to achieve common goals.{% endif %}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="section contact">
+        <h2 class="fade-in">{% if session.get('lang', 'en') == 'ar' %}اتصل بنا{% else %}Contact Us{% endif %}</h2>
+        <p class="section-subtitle fade-in">{% if session.get('lang', 'en') == 'ar' %}تواصل معنا لأي استفسارات أو تعاون{% else %}Get in touch with us for any inquiries or collaboration{% endif %}</p>
+        
+        <div class="contact-info">
+            <div class="contact-card fade-in stagger-delay-1">
+                <h3><i class="fas fa-envelope"></i> {% if session.get('lang', 'en') == 'ar' %}البريد الإلكتروني{% else %}Email{% endif %}</h3>
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <i class="fas fa-at"></i>
+                        <a href="mailto:hr@alghaithcompanies.group">hr@alghaithcompanies.group</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-at"></i>
+                        <a href="mailto:alghaith.company@gmail.com">alghaith.company@gmail.com</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-card fade-in stagger-delay-2">
+                <h3><i class="fas fa-phone"></i> {% if session.get('lang', 'en') == 'ar' %}هواتف الاتصال{% else %}Phone Numbers{% endif %}</h3>
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <i class="fas fa-user-tie"></i>
+   B                     <div>
+                            <div>{% if session.get('lang', 'en') == 'ar' %}المدير العام{% else %}General Director{% endif %}</div>
+                            <a href="tel:+218919996900">+218 919996900</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-user-friends"></i>
+                        <div>
+                            <div>{% if session.get('lang', 'en') == 'ar' %}نائب المدير{% else %}Deputy Manager{% endif %}</div>
+                            <a href="tel:+218913724743">+218 913724743</a>
+                            <a href="tel:+218923724743">+218 923724743</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-card fade-in stagger-delay-3">
+                <h3><i class="fas fa-map-marker-alt"></i> {% if session.get('lang', 'en') == 'ar' %}الموقع{% else %}Location{% endif %}</h3>
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <i class="fas fa-building"></i>
+                        <div>
+                            <div>{% if session.get('lang', 'en') == 'ar' %}المقر الرئيسي{% else %}Headquarters{% endif %}</div>
+                            <div>{% if session.get('lang', 'en') == 'ar' %}طرابلس، ليبيا{% else %}Tripoli, Libya{% endif %}</div>
+                        </div>
+      A              </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <div>{% if session.get('lang', 'en') == 'ar' %}ساعات العمل{% else %}Business Hours{% endif %}</div>
+                            <div>{% if session.get('lang', 'en') == 'ar' %}السبت - الخميس: 8 ص - 5 م{% else %}Sat - Thu: 8 AM - 5 PM{% endif %}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="location-map fade-in" style="margin-top: 20px;">
+            <!-- Icon + Text on top -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                <i class="fas fa-map-marked-alt" style="font-size: 20px;"></i>
+                <span style="font-size: 16px; font-weight: bold; color: #333;">
+                    {% if session.get('lang', 'en') == 'ar' %}
+                        خريطة موقع المقر الرئيسي في طرابلس، ليبيا
+                    {% else %}
+                        Map of our headquarters location in Tripoli, Libya
+                    {% endif %}
+                </span>
+            </div>
+        
+            <!-- Embedded Google Map -->
+            <div class="map-embed" style="width: 100%; height: 450px; border: 1px solid #ccc; border-radius: 6px; overflow: hidden;">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d190625.00847567603!2d13.086!3d32.887!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x13a8937f8bf367b3:0x5189c824cda5979d!2sTripoli,+Libya!5e0!3m2!1sen!2s!4v1695476049066!5m2!1sen!2s" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 {% if session.get('lang', 'en') == 'ar' %}مجموعة الغيث العالمية. جميع الحقوق محفوظة.{% else %}ALGHAITH Int Group. All rights reserved.{% endif %}</p>
+    </footer>
+
+    <script>
+        // Scroll animation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar scroll effect
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+            
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe all elements with animation classes
+            const animatedElements = document.querySelectorAll('.fade-in, .slide-in-left, .slide-in-right, .scale-in');
+            animatedElements.forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+       B         anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+     A               
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+    B    });
+            document.addEventListener("DOMContentLoaded", function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('submitted') === 'success') {
+                    const msg = document.getElementById('successMessage');
+                    if (msg) {
+                        msg.style.display = 'block';  // Show message if hidden
+                        msg.scrollIntoView({ behavior: 'smooth' });  // Scroll to it
+                    }
+                }
+            });
+    </script>
+</body>
+</html>

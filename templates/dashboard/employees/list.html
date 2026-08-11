@@ -1,0 +1,97 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Employees{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Employees</h2>
+        <a href="{{ url_for('dashboard.employee_create') }}" class="btn btn-primary">+ Add Employee</a>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category=='error' else category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Employee Cards -->
+    <div class="row g-3">
+        {% for emp in employees %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <!-- Card Header -->
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ emp.full_name }}</h5>
+                    <small>{{ emp.job_title or '—' }} | {{ emp.department.name if emp.department else '—' }}</small>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body p-2" style="max-height: 500px; overflow-y: auto;">
+                    <!-- Employee Info -->
+                    <ul class="list-group list-group-flush mb-2">
+                        <li class="list-group-item"><strong>Phone:</strong> {{ emp.phone or '—' }}</li>
+                        <li class="list-group-item"><strong>Nationality:</strong> {{ emp.nationality or '—' }}</li>
+                        <li class="list-group-item"><strong>Actual Address:</strong> {{ emp.actual_address or '—' }}</li>
+                        <li class="list-group-item"><strong>Mother Country Address:</strong> {{ emp.mother_country_address or '—' }}</li>
+                        <li class="list-group-item"><strong>Country:</strong> {{ emp.country or '—' }}</li>
+                        <li class="list-group-item"><strong>State:</strong> {{ emp.state or '—' }}</li>
+                        <li class="list-group-item"><strong>Birth Date:</strong> {{ emp.birth_date.strftime('%Y-%m-%d') if emp.birth_date else '—' }}</li>
+                        <li class="list-group-item"><strong>ID Number:</strong> {{ emp.id_number or '—' }}</li>
+                    </ul>
+
+                    <!-- Documents -->
+                    <hr class="my-2">
+                    <h6 class="mb-1">Documents</h6>
+                    {% set docs = employee_docs.get(emp.id, []) %}
+                    
+                    {% for dtype, label in [('passport','Passport'), ('contract','Contract'), ('medical','Medical'), ('additional','Additional')] %}
+                        {% set filtered_docs = docs|selectattr('document_type', 'equalto', dtype)|list %}
+                        <div class="mb-2">
+                            <strong>{{ label }}:</strong>
+                            {% if filtered_docs %}
+                                <ul class="list-unstyled mb-0">
+                                    {% for doc in filtered_docs %}
+                                    <li class="d-flex align-items-center gap-1 mb-1 flex-wrap">
+                                        <span class="flex-grow-1 text-truncate" style="min-width:80px;">{{ doc.filename }}</span>
+                                        <a href="{{ url_for('dashboard.employee_document_download', doc_id=doc.id) }}" class="btn btn-sm btn-success">Download</a>
+                                        <form action="{{ url_for('dashboard.employee_document_delete', doc_id=doc.id) }}" method="POST" style="display:inline;">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this document?')">Delete</button>
+                                        </form>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <div class="text-muted small">No {{ label }} documents</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Card Footer / Actions -->
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ url_for('dashboard.employee_edit', id=emp.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                    <form action="{{ url_for('dashboard.employee_delete', id=emp.id) }}" method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this employee?')">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center text-muted">
+            No employees found.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Leaves{% endblock %}
+
+{% block extra_head %}
+<style>
+    .nav-tabs .nav-link.active {
+        background-color: var(--bs-primary);
+        color: white;
+        border-radius: 0.3rem 0.3rem 0 0;
+    }
+    .tab-content {
+        border: 1px solid #dee2e6;
+        border-top: none;
+        padding: 1rem;
+        border-radius: 0 0 0.3rem 0.3rem;
+        background: #fff;
+    }
+</style>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="container">
+    <!-- Flash messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" id="leaveTabs" role="tablist">
+        {% if current_user.role != 'general_director' %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="new-tab" data-bs-toggle="tab" data-bs-target="#new" type="button" role="tab">New Request</button>
+        </li>
+        {% endif %}
+        
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if current_user.role == 'general_director' %}active{% endif %}" id="my-tab" data-bs-toggle="tab" data-bs-target="#my" type="button" role="tab">My Leaves</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">Pending Leaves</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="leaveTabsContent">
+        <!-- New Request Tab (hidden for general director) -->
+        {% if current_user.role != 'general_director' %}
+        <div class="tab-pane fade show active" id="new" role="tabpanel">
+            <form method="POST" action="{{ url_for('leave.leaves_dashboard') }}">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.type.label(class="form-label") }}
+                    {{ form.type(class="form-select") }}
+                    {% if form.type.errors %}
+                        <div class="text-danger small">{{ form.type.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.start_date.label(class="form-label") }}
+                    {{ form.start_date(class="form-control") }}
+                    {% if form.start_date.errors %}
+                        <div class="text-danger small">{{ form.start_date.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.end_date.label(class="form-label") }}
+                    {{ form.end_date(class="form-control") }}
+                    {% if form.end_date.errors %}
+                        <div class="text-danger small">{{ form.end_date.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.reason.label(class="form-label") }}
+                    {{ form.reason(class="form-control", rows="3") }}
+                    {% if form.reason.errors %}
+                        <div class="text-danger small">{{ form.reason.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.approver_id.label(class="form-label") }}
+                    {{ form.approver_id(class="form-select") }}
+                    {% if form.approver_id.errors %}
+                        <div class="text-danger small">{{ form.approver_id.errors[0] }}</div>
+                    {% endif %}
+                    {% if not form.approver_id.choices %}
+                        <div class="text-warning small mt-1">No approvers available for your role/department.</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <!-- My Leaves Tab -->
+        <div class="tab-pane fade {% if current_user.role == 'general_director' %}show active{% endif %}" id="my" role="tabpanel">
+            {% if requests and requests|length %}
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Type</th>
+                            <th>Period</th>
+                            <th>Status</th>
+                            <th>Approver</th>
+                            <th>Reason</th>
+                            <th>Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in requests %}
+                        <tr>
+                            <td>{{ r.id }}</td>
+                            <td class="text-capitalize">{{ r.type }}</td>
+                            <td>{{ r.start_date }} → {{ r.end_date }}</td>
+                            <td>
+                                {% if r.status == 'approved' %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% elif r.status == 'rejected' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ r.approver.name if r.approver else '-' }}</td>
+                            <td>{{ r.reason or '' }}</td>
+                            <td>{{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-info">No leave requests yet.</div>
+            {% endif %}
+        </div>
+
+        <!-- Pending Leaves Tab -->
+        <div class="tab-pane fade" id="pending" role="tabpanel">
+            {% if pending_requests and pending_requests|length %}
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Employee</th>
+                            <th>Type</th>
+                            <th>Period</th>
+                            <th>Reason</th>
+                            <th>Submitted</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in pending_requests %}
+                        <tr>
+                            <td>{{ r.id }}</td>
+                            <td>{{ r.requester.name }}</td>
+                            <td class="text-capitalize">{{ r.type }}</td>
+                            <td>{{ r.start_date }} → {{ r.end_date }}</td>
+                            <td>{{ r.reason or '' }}</td>
+                            <td>{{ r.created_at.strftime('%Y-%m-%d') if r.created_at else '' }}</td>
+                            <td class="text-end">
+                                {% if r.status == 'pending' %}
+                                    {% if current_user.id == r.approver_id or current_user.role in ['it_manager', 'general_director'] %}
+                                        <form method="POST" action="{{ url_for('leave.set_status', lr_id=r.id, action='approve') }}" style="display:inline;">
+                                            {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+                                            <button class="btn btn-success btn-sm">Approve</button>
+                                        </form>
+                                        <form method="POST" action="{{ url_for('leave.set_status', lr_id=r.id, action='reject') }}" style="display:inline;">
+                                            {% if csrf_token %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endif %}
+                                            <button class="btn btn-danger btn-sm">Reject</button>
+                                        </form>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge 
+                                        {% if r.status == 'approved' %}bg-success
+                                        {% elif r.status == 'rejected' %}bg-danger
+                                        {% endif %}">
+                                        {{ r.status|capitalize }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-info">No pending leave requests.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

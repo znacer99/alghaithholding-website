@@ -1,0 +1,208 @@
+/* ===============================
+   Global Theme Variables
+   =============================== */
+   :root {
+    --brand-primary: #6b4cff;    /* purple */
+    --brand-secondary: #2ad29b;  /* green accent */
+    --brand-accent: #4cbfff;     /* blue accent */
+    --background: #ffffff;       /* main background */
+    --card-bg: #f5f7fb;          /* cards & panels */
+    --text-main: #2e2e2e;        /* primary text */
+    --text-muted: #8a94a6;       /* muted text */
+    --success: #2ecc71;
+    --warning: #f1c40f;
+    --danger: #e74c3c;
+    --shadow-soft: 0 10px 30px rgba(0,0,0,0.08);
+    --radius-lg: 1rem;
+    --sidebar-width: 220px;
+}
+
+/* ===============================
+   Body & Typography
+   =============================== */
+body {
+    background-color: var(--background);
+    color: var(--text-main);
+    font-family: "Inter", sans-serif;
+    line-height: 1.6;
+}
+
+/* ===============================
+   Navbar
+   =============================== */
+.navbar {
+    box-shadow: var(--shadow-soft);
+}
+
+/* ===============================
+   Sidebar
+   =============================== */
+.sidebar {
+    min-height: 100vh;
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, var(--brand-primary), var(--brand-accent));
+    color: white;
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    padding: 1rem;
+}
+
+.sidebar .nav-link {
+    color: white;
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius-lg);
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sidebar .nav-link.active,
+.sidebar .nav-link:hover {
+    background: rgba(255,255,255,0.1);
+    font-weight: bold;
+    transform: scale(1.02);
+}
+
+/* ===============================
+   Role Header
+   =============================== */
+.role-header {
+    background: var(--brand-primary);
+    color: white;
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: var(--shadow-soft);
+}
+
+.role-indicator {
+    background: var(--brand-secondary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* ===============================
+   Cards
+   =============================== */
+.card, .dashboard-link-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.2s;
+}
+
+.card:hover, .dashboard-link-card:hover {
+    transform: scale(1.02);
+}
+
+/* Dashboard stat cards container */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* ===============================
+   Buttons
+   =============================== */
+.btn-primary {
+    background: var(--brand-primary);
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+    background: var(--brand-accent);
+    transform: scale(1.02);
+}
+
+/* Secondary buttons */
+.btn-secondary {
+    background: var(--brand-secondary);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: white;
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-secondary:hover {
+    background: var(--brand-accent);
+    transform: scale(1.02);
+}
+
+/* ===============================
+   Tables
+   =============================== */
+table {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+}
+
+table th, table td {
+    vertical-align: middle;
+}
+
+.table-responsive {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+/* ===============================
+   Charts
+   =============================== */
+.chart-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 1rem;
+}
+
+/* Chart container to ensure responsiveness */
+.chart-container {
+    width: 100%;
+    height: 250px;
+}
+
+/* ===============================
+   Flash Messages
+   =============================== */
+.flash-messages {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 500px;
+    z-index: 1050;
+}
+
+/* ===============================
+   Main Content
+   =============================== */
+.main-content {
+    padding: 2rem;
+}
+
+/* ===============================
+   Responsive tweaks
+   =============================== */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,124 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}{% if job_offer %}Edit Job Offer{% else %}Create Job Offer{% endif %} - Alghaith HR{% endblock %}
+
+{% block dashboard_title %}{% if job_offer %}Edit Job Offer{% else %}Create Job Offer{% endif %}{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h2 class="h4 mb-0">{% if job_offer %}Edit Job Offer #{{ job_offer.id }}{% else %}Post New Job Offer{% endif %}</h2>
+            <p class="text-muted">Fill out the details below in English and Arabic to publish on the website.</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('job_offers.list_job_offers') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-4">
+            <form method="POST" action="{% if job_offer %}{{ url_for('job_offers.edit_job_offer', id=job_offer.id) }}{% else %}{{ url_for('job_offers.create_job_offer') }}{% endif %}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="row g-3">
+                    <!-- Title EN & AR -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Job Title (English) *</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Senior Mechanical Engineer" value="{{ job_offer.title if job_offer else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Job Title (Arabic / المسمى الوظيفي)</label>
+                        <input type="text" name="title_ar" class="form-control text-end" dir="rtl" placeholder="مثال: مهندس ميكانيكي أول" value="{{ job_offer.title_ar if job_offer else '' }}">
+                    </div>
+
+                    <!-- Department & Employment Type -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Department</label>
+                        <select name="department_id" class="form-select">
+                            <option value="">-- Select Department --</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if job_offer and job_offer.department_id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Employment Type</label>
+                        <select name="employment_type" class="form-select">
+                            <option value="Full-time" {% if not job_offer or job_offer.employment_type == 'Full-time' %}selected{% endif %}>Full-time (دوام كامل)</option>
+                            <option value="Part-time" {% if job_offer and job_offer.employment_type == 'Part-time' %}selected{% endif %}>Part-time (دوام جزئي)</option>
+                            <option value="Contract" {% if job_offer and job_offer.employment_type == 'Contract' %}selected{% endif %}>Contract (عقد محدد)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="active" {% if not job_offer or job_offer.status == 'active' %}selected{% endif %}>Active (نشط)</option>
+                            <option value="closed" {% if job_offer and job_offer.status == 'closed' %}selected{% endif %}>Closed (مغلق)</option>
+                            <option value="draft" {% if job_offer and job_offer.status == 'draft' %}selected{% endif %}>Draft (مسودة)</option>
+                        </select>
+                    </div>
+
+                    <!-- Category & Specialty -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Category</label>
+                        <select name="category" class="form-select" id="categorySelect">
+                            <option value="">-- Select Category --</option>
+                            <option value="Engineer" {% if job_offer and job_offer.category == 'Engineer' %}selected{% endif %}>Engineer</option>
+                            <option value="Technician" {% if job_offer and job_offer.category == 'Technician' %}selected{% endif %}>Technician</option>
+                            <option value="Helper" {% if job_offer and job_offer.category == 'Helper' %}selected{% endif %}>Helper</option>
+                            <option value="Unskilled Worker" {% if job_offer and job_offer.category == 'Unskilled Worker' %}selected{% endif %}>Unskilled Worker</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Specialty</label>
+                        <input type="text" name="specialty" class="form-control" placeholder="e.g. Drilling & Workover / Assembly" value="{{ job_offer.specialty if job_offer else '' }}">
+                    </div>
+
+                    <!-- Location EN & AR -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Location (English)</label>
+                        <input type="text" name="location" class="form-control" value="{{ job_offer.location if job_offer else 'Tripoli, Libya' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Location (Arabic / الموقع)</label>
+                        <input type="text" name="location_ar" class="form-control text-end" dir="rtl" value="{{ job_offer.location_ar if job_offer else 'طرابلس، ليبيا' }}">
+                    </div>
+
+                    <!-- Description EN & AR -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Job Description (English)</label>
+                        <textarea name="description" class="form-control" rows="5" placeholder="Enter detailed job description...">{{ job_offer.description if job_offer else '' }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Job Description (Arabic / الوصف الوظيفي)</label>
+                        <textarea name="description_ar" class="form-control text-end" dir="rtl" rows="5" placeholder="أدخل الوصف الوظيفي تفصيلياً...">{{ job_offer.description_ar if job_offer else '' }}</textarea>
+                    </div>
+
+                    <!-- Requirements EN & AR -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Requirements & Qualifications (English)</label>
+                        <textarea name="requirements" class="form-control" rows="5" placeholder="Enter job requirements (e.g. 5+ years experience in Oil & Gas)...">{{ job_offer.requirements if job_offer else '' }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Requirements & Qualifications (Arabic / المتطلبات والخبرات)</label>
+                        <textarea name="requirements_ar" class="form-control text-end" dir="rtl" rows="5" placeholder="أدخل متطلبات الوظيفة والشروط...">{{ job_offer.requirements_ar if job_offer else '' }}</textarea>
+                    </div>
+
+                    <div class="col-12 text-end mt-4">
+                        <a href="{{ url_for('job_offers.list_job_offers') }}" class="btn btn-light me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-circle me-1"></i>{% if job_offer %}Save Changes{% else %}Publish Job Offer{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

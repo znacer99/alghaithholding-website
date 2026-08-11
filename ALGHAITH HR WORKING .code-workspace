@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "../../Desktop/my_ai_agent"
+		},
+		{
+			"path": "."
+		},
+		{
+			"name": "kuro-hr-v1",
+			"path": "../kuro-hr-v1"
+		},
+		{
+			"name": "Taxi",
+			"path": "../../Desktop/BLACKROCK/Taxi"
+		}
+	],
+	"settings": {}
+}

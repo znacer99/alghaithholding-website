@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>My Folders</h2>
+
+<!-- Create Folder Form -->
+<form method="POST" action="{{ url_for('docs.create_folder') }}">
+    <input type="text" name="name" placeholder="New folder name" required>
+    <button type="submit">Create Folder</button>
+</form>
+
+<hr>
+
+<!-- List Folders -->
+{% if folders %}
+    <ul>
+    {% for folder in folders %}
+        <li>
+            <strong>{{ folder.name }}</strong> 
+            (Created by: {{ folder.creator.name if folder.creator else 'Unknown' }})  
+            <!-- Optionally link to documents inside the folder -->
+            <ul>
+                {% for doc in folder.documents %}
+                    <li>{{ doc.filename }} ({{ doc.visibility }})</li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No folders found.</p>
+{% endif %}
+{% endblock %}

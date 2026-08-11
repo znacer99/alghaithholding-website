@@ -1,0 +1,37 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Employee List</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr>
+                <td>{{ employee.name }}</td>
+                <td>{{ employee.email }}</td>
+                <td>{{ employee.department.name if employee.department else '-' }}</td>
+                <td>{{ 'Active' if employee.is_active else 'Inactive' }}</td>
+                <td>
+                    <a href="{{ url_for('admin.edit_employee', employee_id=employee.id) }}" 
+                       class="btn btn-sm btn-primary">Edit</a>
+                       
+                    <form method="POST" action="{{ url_for('admin.toggle_employee', employee_id=employee.id) }}" style="display:inline">
+                        <button type="submit" class="btn btn-sm {{ 'btn-warning' if employee.is_active else 'btn-success' }}">
+                            {{ 'Deactivate' if employee.is_active else 'Activate' }}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

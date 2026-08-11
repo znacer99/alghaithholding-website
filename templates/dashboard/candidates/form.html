@@ -1,0 +1,183 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}
+  {{ "Edit Candidate" if candidate else "Add Candidate" }}
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0">{{ "Edit Candidate" if candidate else "Create Candidate" }}</h5>
+  </div>
+  <div class="card-body">
+    <form method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="row">
+        <!-- Personal Information -->
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="full_name" class="form-label">Full Name *</label>
+            <input type="text" name="full_name" id="full_name" class="form-control"
+                   value="{{ candidate.full_name if candidate else '' }}" required>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" name="email" id="email" class="form-control"
+                   value="{{ candidate.email if candidate else '' }}">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="phone" class="form-label">Phone</label>
+            <input type="text" name="phone" id="phone" class="form-control"
+                   value="{{ candidate.phone if candidate else '' }}">
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="nationality" class="form-label">Nationality</label>
+            <input type="text" name="nationality" id="nationality" class="form-control"
+                   value="{{ candidate.nationality if candidate else '' }}">
+          </div>
+        </div>
+      </div>
+
+      <!-- Position and Specialty Fields -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="applied_position" class="form-label">Applied Position</label>
+            <select name="applied_position" id="applied_position" class="form-select">
+              <option value="">Select Position</option>
+              <option value="Engineer" {{ "selected" if candidate and candidate.applied_position == "Engineer" }}>Engineer</option>
+              <option value="Technician" {{ "selected" if candidate and candidate.applied_position == "Technician" }}>Technician</option>
+              <option value="Helper" {{ "selected" if candidate and candidate.applied_position == "Helper" }}>Helper</option>
+              <option value="Unskilled Worker" {{ "selected" if candidate and candidate.applied_position == "Unskilled Worker" }}>Unskilled Worker</option>
+              <option value="Other" {{ "selected" if candidate and candidate.applied_position == "Other" }}>Other</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Specialty Dropdown -->
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="specialty" class="form-label">Specialty *</label>
+            <select name="specialty" id="specialty" class="form-select" required>
+              <option value="">Select Specialty</option>
+              {% for specialty in specialties %}
+              <option value="{{ specialty }}" {{ "selected" if candidate and candidate.specialty == specialty }}>
+                {{ specialty }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="department_id" class="form-label">Department</label>
+            <select name="department_id" id="department_id" class="form-select">
+              <option value="">Select Department</option>
+              {% for dept in departments %}
+              <option value="{{ dept.id }}"
+                      {{ "selected" if candidate and candidate.department_id == dept.id }}>
+                {{ dept.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select name="status" id="status" class="form-select">
+              <option value="new" {{ "selected" if candidate and candidate.status == "new" }}>New</option>
+              <option value="interviewed" {{ "selected" if candidate and candidate.status == "interviewed" }}>Interviewed</option>
+              <option value="hired" {{ "selected" if candidate and candidate.status == "hired" }}>Hired</option>
+              <option value="rejected" {{ "selected" if candidate and candidate.status == "rejected" }}>Rejected</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Professional Background -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="experience" class="form-label">Years of Experience</label>
+            <select name="experience" id="experience" class="form-select">
+              <option value="">Select experience</option>
+              <option value="0-2" {{ "selected" if candidate and candidate.experience == "0-2" }}>0-2 years</option>
+              <option value="3-5" {{ "selected" if candidate and candidate.experience == "3-5" }}>3-5 years</option>
+              <option value="6-10" {{ "selected" if candidate and candidate.experience == "6-10" }}>6-10 years</option>
+              <option value="10+" {{ "selected" if candidate and candidate.experience == "10+" }}>10+ years</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="education" class="form-label">Highest Education</label>
+            <select name="education" id="education" class="form-select">
+              <option value="">Select education</option>
+              <option value="High School" {{ "selected" if candidate and candidate.education == "High School" }}>High School</option>
+              <option value="Bachelor's" {{ "selected" if candidate and candidate.education == "Bachelor's" }}>Bachelor's Degree</option>
+              <option value="Master's" {{ "selected" if candidate and candidate.education == "Master's" }}>Master's Degree</option>
+              <option value="PhD" {{ "selected" if candidate and candidate.education == "PhD" }}>PhD</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="skills" class="form-label">Key Skills & Qualifications</label>
+        <textarea name="skills" id="skills" class="form-control" rows="3" 
+                  placeholder="List relevant skills and qualifications...">{{ candidate.skills if candidate else '' }}</textarea>
+      </div>
+
+      <!-- Documents -->
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="cv" class="form-label">Upload CV</label>
+            <input type="file" name="cv" id="cv" class="form-control">
+            {% if candidate and candidate.cv_filepath %}
+              <small class="text-muted">Current: <a href="{{ url_for('static', filename=candidate.cv_filepath) }}" target="_blank">View CV</a></small>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="id_document" class="form-label">Upload ID Document *</label>
+            <input type="file" name="id_document" id="id_document" class="form-control" 
+                   {{ 'required' if not candidate else '' }}>
+            {% if candidate and candidate.id_document_filepath %}
+              <small class="text-muted">Current: <a href="{{ url_for('static', filename=candidate.id_document_filepath) }}" target="_blank">View Document</a></small>
+            {% else %}
+              <small class="text-muted text-danger">ID Document is required for new candidates</small>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="d-flex justify-content-between mt-4">
+        <a href="{{ url_for('candidates.list_candidates') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">{{ "Update Candidate" if candidate else "Create Candidate" }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

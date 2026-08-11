@@ -1,0 +1,155 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <h4 class="page-title">My Profile</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Profile Information Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('profile.my_profile') }}">
+                        {{ profile_form.hidden_tag() }}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Access Code</label>
+                                <input type="text" class="form-control" value="{{ current_user.access_code }}" readonly>
+                                <small class="form-text text-muted">Your unique access code</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Role</label>
+                                <input type="text" class="form-control" value="{{ current_user.role|title }}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ profile_form.name.label(class="form-label") }}
+                                {{ profile_form.name(class="form-control") }}
+                                {% for error in profile_form.name.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.email.label(class="form-label") }}
+                                {{ profile_form.email(class="form-control") }}
+                                {% for error in profile_form.email.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ profile_form.phone.label(class="form-label") }}
+                                {{ profile_form.phone(class="form-control") }}
+                                {% for error in profile_form.phone.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ profile_form.position.label(class="form-label") }}
+                                {{ profile_form.position(class="form-control") }}
+                                {% for error in profile_form.position.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <button type="submit" name="profile_submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title">Change Password</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('profile.my_profile') }}">
+                        {{ password_form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ password_form.current_password.label(class="form-label") }}
+                            {{ password_form.current_password(class="form-control") }}
+                            {% for error in password_form.current_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                {{ password_form.new_password.label(class="form-label") }}
+                                {{ password_form.new_password(class="form-control") }}
+                                {% for error in password_form.new_password.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ password_form.confirm_password.label(class="form-label") }}
+                                {{ password_form.confirm_password(class="form-control") }}
+                                {% for error in password_form.confirm_password.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <button type="submit" name="password_submit" class="btn btn-warning">Change Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with user info -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Account Information</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div class="avatar-lg mx-auto mb-3">
+                            <div class="avatar-title bg-light rounded-circle text-primary fs-24">
+                                {{ current_user.name[0]|upper }}
+                            </div>
+                        </div>
+                        <h5>{{ current_user.name }}</h5>
+                        <p class="text-muted">{{ current_user.position or 'No position set' }}</p>
+                    </div>
+                    
+                    <div class="text-start">
+                        <p><strong>Email:</strong><br>{{ current_user.email }}</p>
+                        <p><strong>Phone:</strong><br>{{ current_user.phone or 'Not set' }}</p>
+                        <p><strong>Member since:</strong><br>{{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                        <p><strong>Last login:</strong><br>
+                            {% if current_user.last_login %}
+                                {{ current_user.last_login.strftime('%B %d, %Y at %H:%M') }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <a href="{{ url_for('profile.activity_log') }}" class="btn btn-outline-primary btn-sm mt-2">
+                        View Activity Log
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Add New User{% endblock %}
+
+{% block dashboard_content %}
+<div class="card">
+  <div class="card-header">
+    <h5>Create User</h5>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.name.label(class="form-label") }}
+        {{ form.name(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.role.label(class="form-label") }}
+        {{ form.role(class="form-select") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.department.label(class="form-label") }}
+        {{ form.department(class="form-select") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.position.label(class="form-label") }}
+        {{ form.position(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.phone.label(class="form-label") }}
+        {{ form.phone(class="form-control") }}
+      </div>
+
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control") }}
+      </div>      
+
+      <button type="submit" class="btn btn-success">Create User</button>
+      <a href="{{ url_for('dashboard.user_management') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+/* static/css/responsive.css */
+@media (max-width: 768px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .card-container {
+      flex-direction: column;
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+      display: block;
+    }
+    
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+  
+  /* Accessibility enhancements */
+  :focus-visible {
+    outline: 3px solid #3a86ff !important;
+  }
+  
+  .high-contrast {
+    color: #000 !important;
+    background: #fff !important;
+  }

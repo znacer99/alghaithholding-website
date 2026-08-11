@@ -1,0 +1,149 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}Documents{% endblock %}
+
+{% block dashboard_content %}
+<div class="container">
+
+    <!-- My Documents Section -->
+    <div class="mb-4">
+        <h2>📂 My Documents</h2>
+
+        <!-- Upload Buttons -->
+        <div class="d-flex gap-3 mb-3">
+            <!-- Create Folder -->
+            <form action="{{ url_for('docs.create_folder') }}" method="POST" class="d-flex gap-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="text" name="folder_name" placeholder="Folder name" required class="form-control form-control-sm">
+                <button type="submit" class="btn btn-sm btn-primary">+ Folder</button>
+            </form>
+
+            <!-- Upload Documents -->
+            <form action="{{ url_for('docs.upload_document') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="file" name="documents" multiple required class="form-control form-control-sm">
+                <select name="folder_id" class="form-select form-select-sm">
+                    <option value="">-- Root --</option>
+                    {% for folder in folders %}
+                    <option value="{{ folder.id }}">{{ folder.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-sm btn-success">Upload</button>
+            </form>
+        </div>
+
+        <!-- Folders -->
+        {% if folders %}
+        <div class="accordion mb-3" id="foldersAccordion">
+            {% for folder in folders %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ folder.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ folder.id }}">
+                        {{ folder.name }} 📁
+                    </button>
+                </h2>
+                <div id="collapse{{ folder.id }}" class="accordion-collapse collapse" data-bs-parent="#foldersAccordion">
+                    <div class="accordion-body">
+                        {% if folder.documents %}
+                        <ul class="list-group mb-2">
+                            {% for doc in folder.documents %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ doc.filename }}
+                                <div class="d-flex gap-2">
+                                    {% if doc.can_owner_access(current_user) %}
+                                    <a href="{{ url_for('docs.download_document', doc_id=doc.id) }}" class="btn btn-sm btn-primary">⬇️ Download</a>
+                                    {% endif %}
+                                    {% if doc.can_owner_delete(current_user) %}
+                                    <form action="{{ url_for('docs.delete_document', doc_id=doc.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete document?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button class="btn btn-sm btn-danger">🗑 Delete</button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-muted">No documents in this folder.</p>
+                        {% endif %}
+
+                        <!-- Delete Folder -->
+                        <form action="{{ url_for('docs.delete_folder', folder_id=folder.id) }}" method="POST" onsubmit="return confirm('Delete folder and all its documents?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-danger">Delete Folder</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">No folders created yet.</p>
+        {% endif %}
+
+        <!-- Root Documents -->
+        {% if documents %}
+        <div class="mb-4">
+            <h4>📄 Root Documents</h4>
+            <ul class="list-group">
+                {% for doc in documents %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ doc.filename }}
+                    <div class="d-flex gap-2">
+                        {% if doc.can_owner_access(current_user) %}
+                        <a href="{{ url_for('docs.download_document', doc_id=doc.id) }}" class="btn btn-sm btn-primary">⬇️ Download</a>
+                        {% endif %}
+                        {% if doc.can_owner_delete(current_user) %}
+                        <form action="{{ url_for('docs.delete_document', doc_id=doc.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete document?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-danger">🗑 Delete</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Shared Documents -->
+    <div>
+        <h2>🌐 Shared Documents</h2>
+
+        {% if current_user.role.lower() != "employee" %}
+        <form action="{{ url_for('docs.upload_document') }}" method="POST" enctype="multipart/form-data" class="mb-3 d-flex gap-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="file" name="documents" multiple required class="form-control form-control-sm">
+            <input type="hidden" name="folder_id" value="">
+            <input type="hidden" name="visibility_type" value="shared">
+            <button type="submit" class="btn btn-sm btn-success">Upload to Shared</button>
+        </form>
+        {% endif %}
+
+        {% if shared_documents %}
+        <ul class="list-group">
+            {% for doc in shared_documents %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ doc.filename }} by {{ doc.user.name }} ({{ doc.user.role }})
+                <div class="d-flex gap-2">
+                    {% if doc.can_owner_access(current_user) %}
+                    <a href="{{ url_for('docs.download_document', doc_id=doc.id) }}" class="btn btn-sm btn-primary">⬇️ Download</a>
+                    {% endif %}
+                    {% if doc.can_owner_delete(current_user) %}
+                    <form action="{{ url_for('docs.delete_document', doc_id=doc.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete document?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-danger">🗑 Delete</button>
+                    </form>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No shared documents yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

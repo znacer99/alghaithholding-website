@@ -1,0 +1,136 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}{{ job_offer.title }} - Job Offer Details{% endblock %}
+
+{% block dashboard_title %}Job Offer Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="h3 mb-1">{{ job_offer.title }}</h2>
+            {% if job_offer.title_ar %}
+            <h4 class="h5 text-muted mb-2" dir="rtl">{{ job_offer.title_ar }}</h4>
+            {% endif %}
+            <div class="d-flex gap-2 align-items-center">
+                <span class="badge {% if job_offer.status == 'active' %}bg-success{% elif job_offer.status == 'closed' %}bg-secondary{% else %}bg-warning{% endif %}">
+                    {{ job_offer.status|title }}
+                </span>
+                <span class="badge bg-info text-dark">{{ job_offer.employment_type }}</span>
+                {% if job_offer.department %}
+                <span class="badge bg-light text-dark"><i class="bi bi-diagram-3 me-1"></i>{{ job_offer.department.name }}</span>
+                {% endif %}
+                <small class="text-muted"><i class="bi bi-geo-alt text-danger me-1"></i>{{ job_offer.location }}</small>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('job_offers.edit_job_offer', id=job_offer.id) }}" class="btn btn-primary me-2">
+                <i class="bi bi-pencil me-1"></i>Edit Job Offer
+            </a>
+            <a href="{{ url_for('job_offers.list_job_offers') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Job Info Details Card -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">English Details</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Job Description</h6>
+                    <p class="text-secondary">{{ job_offer.description or 'No description provided.' }}</p>
+                    <hr>
+                    <h6>Requirements & Qualifications</h6>
+                    <p class="text-secondary">{{ job_offer.requirements or 'No requirements specified.' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-light text-end">
+                    <h5 class="card-title mb-0" dir="rtl">التفاصيل بالعربية</h5>
+                </div>
+                <div class="card-body text-end" dir="rtl">
+                    <h6>الوصف الوظيفي</h6>
+                    <p class="text-secondary">{{ job_offer.description_ar or 'لا يوجد وصف متاح.' }}</p>
+                    <hr>
+                    <h6>المتطلبات والشروط</h6>
+                    <p class="text-secondary">{{ job_offer.requirements_ar or 'لا توجد متطلبات محددة.' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applicants List Card -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-people me-2"></i>Applicants for this Position ({{ job_offer.candidates|length }})</h5>
+        </div>
+        <div class="card-body">
+            {% if job_offer.candidates %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Candidate Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Nationality</th>
+                            <th>Specialty</th>
+                            <th>Experience</th>
+                            <th>Status</th>
+                            <th>Applied Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate in job_offer.candidates %}
+                        <tr>
+                            <td><strong>{{ candidate.full_name }}</strong></td>
+                            <td>{{ candidate.email }}</td>
+                            <td>{{ candidate.phone }}</td>
+                            <td><span class="badge bg-light text-dark">{{ candidate.nationality or 'N/A' }}</span></td>
+                            <td><span class="badge bg-secondary">{{ candidate.specialty or 'N/A' }}</span></td>
+                            <td><span class="badge bg-info text-dark">{{ candidate.experience or 'N/A' }}</span></td>
+                            <td>
+                                <span class="badge 
+                                    {% if candidate.status == 'new' %}bg-info
+                                    {% elif candidate.status == 'interviewed' %}bg-primary
+                                    {% elif candidate.status == 'hired' %}bg-success
+                                    {% elif candidate.status == 'rejected' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ candidate.status|title }}
+                                </span>
+                            </td>
+                            <td>{{ candidate.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('candidates.edit_candidate', id=candidate.id) }}" class="btn btn-sm btn-outline-primary" title="View/Edit Candidate">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    {% if candidate.cv_filepath %}
+                                    <a href="{{ url_for('static', filename=candidate.cv_filepath) }}" target="_blank" class="btn btn-sm btn-outline-info" title="View CV">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="bi bi-person-x display-4 text-muted"></i>
+                <p class="mt-2 text-muted">No candidates have applied specifically for this position yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% set role_color = '#0a58ca' %}
+
+{% block title %}Manager Dashboard{% endblock %}
+{% block dashboard_title %}Manager Dashboard{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Team Members Summary -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Team Members</h5>
+                <p class="card-text display-4">{{ department_employee_count }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Manager -->
+<div class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Documents</h5>
+    <form class="d-flex gap-2" action="{{ url_for('employee.create_folder') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input name="folder_name" class="form-control form-control-sm" placeholder="New folder name">
+      <button class="btn btn-sm btn-outline-primary" type="submit">Create Folder</button>
+    </form>
+  </div>
+  <div class="card-body">
+
+    <!-- Upload Form -->
+    <form action="{{ url_for('employee.upload_document') }}" method="POST" enctype="multipart/form-data" class="row g-2 align-items-end">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-md-4">
+        <label class="form-label">Files</label>
+        <input type="file" name="documents" class="form-control" multiple required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Folder</label>
+        <input name="folder_name" class="form-control" placeholder="e.g. HR, Finance">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Visibility</label>
+        <select name="visibility_type" class="form-select">
+          <option value="private" selected>Private</option>
+          <option value="public">Public</option>
+          <option value="users">Specific Users</option>
+          <option value="roles">Roles</option>
+          <option value="departments">Departments</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Allowed (optional)</label>
+        <input name="allowed_users" class="form-control mb-1" placeholder="Users: 3,5,8">
+        <input name="allowed_roles" class="form-control mb-1" placeholder="Roles: manager,employee">
+        <input name="allowed_departments" class="form-control" placeholder="Depts: 1,2">
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary">Upload</button>
+      </div>
+    </form>
+
+    <hr>
+
+    <!-- My Documents -->
+    <div class="row">
+      <div class="col-md-6">
+        <h6>My Documents</h6>
+        {% set mydocs = my_documents if my_documents is defined else documents %}
+        {% if mydocs and mydocs|length > 0 %}
+        <ul class="list-group">
+          {% for doc in mydocs %}
+          <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{ doc.filename }}</strong>
+                {% if doc.folder_name %}<span class="badge bg-light text-dark ms-2">{{ doc.folder_name }}</span>{% endif %}
+                <small class="text-muted ms-2">{{ doc.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                <small class="ms-2">[{{ doc.visibility_type }}]</small>
+              </div>
+              <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('employee.download_document', doc_id=doc.id) }}">Download</a>
+                <form method="POST" action="{{ url_for('employee.change_visibility', doc_id=doc.id) }}" class="d-flex gap-2">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <select name="visibility_type" class="form-select form-select-sm">
+                    <option value="private" {% if doc.visibility_type=='private' %}selected{% endif %}>private</option>
+                    <option value="public" {% if doc.visibility_type=='public' %}selected{% endif %}>public</option>
+                    <option value="users" {% if doc.visibility_type=='users' %}selected{% endif %}>users</option>
+                    <option value="roles" {% if doc.visibility_type=='roles' %}selected{% endif %}>roles</option>
+                    <option value="departments" {% if doc.visibility_type=='departments' %}selected{% endif %}>departments</option>
+                  </select>
+                  <button class="btn btn-sm btn-outline-primary">Save</button>
+                </form>
+                <form action="{{ url_for('employee.delete_document', doc_id=doc.id) }}" method="POST">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No documents yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- Shared Documents -->
+      <div class="col-md-6">
+        <h6>Shared With Me</h6>
+        {% if shared_documents and shared_documents|length > 0 %}
+        <ul class="list-group">
+          {% for doc in shared_documents %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ doc.filename }}</strong>
+              <small class="text-muted ms-2">from {{ doc.user.name }}</small>
+              {% if doc.folder_name %}<span class="badge bg-light text-dark ms-2">{{ doc.folder_name }}</span>{% endif %}
+            </div>
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('employee.download_document', doc_id=doc.id) }}">Download</a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No shared documents.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leave Requests Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <a href="{{ url_for('leave.leaves_dashboard') }}" class="text-decoration-none">
+            <div class="card text-center dashboard-link-card">
+                <div class="card-body">
+                    <h5 class="card-title">My Leave Requests</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a href="{{ url_for('leave.leaves_dashboard') }}" class="text-decoration-none">
+            <div class="card text-center dashboard-link-card">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Leave Requests</h5>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Department Activities</h5>
+    </div>
+    <div class="card-body">
+        {% include 'dashboard/partials/recent_activities.html' %}
+    </div>
+</div>
+
+<!-- My Team -->
+<div class="card">
+    <div class="card-header">
+        <h5>My Team</h5>
+    </div>
+    <div class="card-body">
+        {% include 'dashboard/partials/employee_summary.html' %}
+    </div>
+</div>
+
+{% endblock %}

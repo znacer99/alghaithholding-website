@@ -1,0 +1,138 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block dashboard_title %}IT Manager Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid mt-4">
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5>Total Employees</h5>
+                    <p class="fs-3">{{ total_employees }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5>Active Employees</h5>
+                    <p class="fs-3">{{ active_employees }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5>Inactive Employees</h5>
+                    <p class="fs-3">{{ inactive_employees }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5>Total Users</h5>
+                    <p class="fs-3">{{ total_users }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5>Hiring Trend (Last 6 Months)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="hiringTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5>Employees per Department</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="deptEmployeesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Breakdown -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <h5>User Breakdown by Role</h5>
+        </div>
+        <div class="card-body">
+            {% if user_counts %}
+                <ul class="list-group">
+                    {% for role, count in user_counts.items() %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ role|replace('_', ' ')|title }}
+                            <span class="badge bg-primary rounded-pill">{{ count }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No users found.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5>Recent Activities</h5>
+        </div>
+        <div class="card-body">
+            {% include 'dashboard/partials/recent_activities.html' %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Hiring Trend Chart
+    const ctxHiring = document.getElementById('hiringTrendChart').getContext('2d');
+    new Chart(ctxHiring, {
+        type: 'line',
+        data: {
+            labels: {{ hiring_months|tojson }},
+            datasets: [{
+                label: 'Hires',
+                data: {{ hiring_counts|tojson }},
+                borderColor: '#6b4cff',
+                backgroundColor: 'rgba(107, 76, 255, 0.2)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // Employees per Department Chart
+    const ctxDept = document.getElementById('deptEmployeesChart').getContext('2d');
+    new Chart(ctxDept, {
+        type: 'bar',
+        data: {
+            labels: {{ department_names|tojson }},
+            datasets: [{
+                label: 'Employees',
+                data: {{ employees_per_dept|tojson }},
+                backgroundColor: '#2ad29b'
+            }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+    });
+</script>
+{% endblock %}

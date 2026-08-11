@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - HRcopilot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #dbeafe);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 2rem 2rem 2.5rem 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+            border-top: 6px solid #3b82f6;
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 5000;
+            color: #1e40af;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1.2rem 1rem 0.6rem 1rem;
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            background: none;
+            box-sizing: border-box;
+            transition: 0.2s border-color;
+        }
+
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+
+        label {
+            position: absolute;
+            top: 1.1rem;
+            left: 1rem;
+            color: #3b82f6;
+            font-size: 0.875rem;
+            pointer-events: none;
+            transition: 0.2s ease all;
+        }
+
+        .form-control:focus + label,
+        .form-control:not(:placeholder-shown) + label {
+            top: -0.6rem;
+            left: 0.75rem;
+            font-size: 0.75rem;
+            color: #1e40af;
+            background-color: #fff;
+            padding: 0 0.25rem;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 8px;
+            background-color: #3b82f6;
+            border: none;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s all;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .alert {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #3b82f6;
+            background-color: #dbeafe;
+            color: #1e3a8a;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+        }
+
+        .forgot-password {
+            display: block;
+            text-align: right;
+            font-size: 0.85rem;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+            .login-card {
+                padding: 1.5rem 1.5rem 2rem 1.5rem;
+                margin: 1rem;
+            }
+
+            .form-control {
+                padding: 1rem 0.8rem 0.5rem 0.8rem;
+                font-size: 0.95rem;
+            }
+
+            label {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>ALGHAITH INTERNATIONAL GROUP</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.email(class="form-control", placeholder=" ") }}
+                <label>Email</label>
+                {% if form.email.errors %}
+                    <small class="text-danger">{{ form.email.errors[0] }}</small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password(class="form-control", placeholder=" ") }}
+                <label>Password</label>
+                {% if form.password.errors %}
+                    <small class="text-danger">{{ form.password.errors[0] }}</small>
+                {% endif %}
+            </div>
+
+            <a href="#" class="forgot-password">Forgot password?</a>
+
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+    </div>
+</body>
+</html>
