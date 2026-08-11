@@ -3,12 +3,23 @@ from datetime import timedelta
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Ensure instance folder exists
-INSTANCE_DIR = os.path.join(basedir, 'instance')
-os.makedirs(INSTANCE_DIR, exist_ok=True)
+is_vercel = os.environ.get('VERCEL') == '1' or 'VERCEL' in os.environ
+
+if is_vercel:
+    INSTANCE_DIR = '/tmp/instance'
+else:
+    INSTANCE_DIR = os.path.join(basedir, 'instance')
+
+try:
+    os.makedirs(INSTANCE_DIR, exist_ok=True)
+except Exception:
+    pass
 
 UPLOAD_FOLDER = os.path.join(INSTANCE_DIR, 'uploads', 'documents')
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+try:
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+except Exception:
+    pass
 
 DB_PATH = os.path.join(INSTANCE_DIR, 'app.db')
 
