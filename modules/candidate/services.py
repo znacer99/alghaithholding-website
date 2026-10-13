@@ -31,7 +31,29 @@ def save_file(file_obj, subfolder="candidates"):
 
 
 # -------------------- CRUD -------------------- #
-def save_candidate(form_data, cv_file=None, id_file=None):
+def save_candidate(form_data, cv_file=None, id_file=None, cv_url=None, id_url=None):
+    """
+    Save a candidate record.
+    For public applications (via landing page), cv_url and id_url are pre-uploaded
+    Supabase Storage URLs passed directly. For dashboard (internal) use, cv_file/id_file
+    are passed as file objects and saved locally then synced.
+    """
+    # Determine file storage paths/URLs
+    if cv_url:
+        # Client-side upload flow: files already in Supabase Storage
+        candidate_cv = cv_url
+    elif cv_file:
+        candidate_cv = save_file(cv_file)
+    else:
+        candidate_cv = None
+
+    if id_url:
+        candidate_id_doc = id_url
+    elif id_file:
+        candidate_id_doc = save_file(id_file)
+    else:
+        candidate_id_doc = None
+
     candidate = Candidate(
         full_name=form_data.get("full_name"),
         email=form_data.get("email"),
@@ -47,14 +69,13 @@ def save_candidate(form_data, cv_file=None, id_file=None):
         status=form_data.get("status") or "new",
     )
 
-    candidate.cv_filepath = save_file(cv_file)
-    candidate.id_document_filepath = save_file(id_file)
+    candidate.cv_filepath = candidate_cv
+    candidate.id_document_filepath = candidate_id_doc
 
-    # Validate required fields for public applications
     if not candidate.id_document_filepath:
         raise ValueError("ID document is required")
 
-    # On Vercel, save to SQLite in /tmp
+    # Save to local DB (may be SQLite on Vercel /tmp — fallback)
     try:
         db.session.add(candidate)
         db.session.commit()
@@ -64,16 +85,22 @@ def save_candidate(form_data, cv_file=None, id_file=None):
 
     # Real-time Auto-Sync to Supabase Database and Storage
     try:
-        is_vercel = os.environ.get('VERCEL') == '1' or 'VERCEL' in os.environ
-        if is_vercel:
-            cv_local = candidate.cv_filepath
-            id_local = candidate.id_document_filepath
+        if cv_url or id_url:
+            # Files already uploaded — pass None for local paths, URLs will be used from candidate object
+            from core.supabase_sync import sync_candidate_to_supabase
+            sync_candidate_to_supabase(candidate, None, None)
         else:
-            cv_local = os.path.join(current_app.root_path, "static", candidate.cv_filepath) if candidate.cv_filepath else None
-            id_local = os.path.join(current_app.root_path, "static", candidate.id_document_filepath) if candidate.id_document_filepath else None
-        
-        from core.supabase_sync import sync_candidate_to_supabase
-        sync_candidate_to_supabase(candidate, cv_local, id_local)
+            # Legacy local file flow
+            is_vercel = os.environ.get('VERCEL') == '1' or 'VERCEL' in os.environ
+            if is_vercel:
+                cv_local = candidate.cv_filepath
+                id_local = candidate.id_document_filepath
+            else:
+                cv_local = os.path.join(current_app.root_path, "static", candidate.cv_filepath) if candidate.cv_filepath else None
+                id_local = os.path.join(current_app.root_path, "static", candidate.id_document_filepath) if candidate.id_document_filepath else None
+
+            from core.supabase_sync import sync_candidate_to_supabase
+            sync_candidate_to_supabase(candidate, cv_local, id_local)
     except Exception as sync_err:
         current_app.logger.error("Supabase auto-sync failed for new candidate: %s", sync_err)
 

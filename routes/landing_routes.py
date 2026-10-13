@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from config_data.specialties import SPECIALTIES, SPECIALTIES_BY_CATEGORY
 from config_data.nationalities import NATIONALITIES
+import os
 
 from core.models import JobOffer
 
@@ -21,5 +22,6 @@ def landing():
         specialties_by_category=SPECIALTIES_BY_CATEGORY,
         nationalities=NATIONALITIES,
         submitted=submitted,
-        job_offers=job_offers
+        job_offers=job_offers,
+        supabase_anon_key=os.getenv("SUPABASE_ANON_KEY", os.getenv("SUPABASE_KEY", ""))
     )

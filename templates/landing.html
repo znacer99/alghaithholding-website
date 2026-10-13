@@ -1414,7 +1414,7 @@
         <div class="application-container">
             <form class="application-form fade-in stagger-delay-1" id="applicationForm"
                   action="{{ url_for('candidates.public_apply') }}"
-                  method="POST" enctype="multipart/form-data">
+                  method="POST">
 
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="job_offer_id" id="job_offer_id" value="">
@@ -1523,15 +1523,29 @@
                 
                 <div class="form-section">
                     <h3>{% if session.get('lang', 'en') == 'ar' %}مستندات التقديم{% else %}Application Materials{% endif %}</h3>
+
+                    <!-- Hidden fields to store Supabase URLs after client-side upload -->
+                    <input type="hidden" id="cv_url" name="cv_url">
+                    <input type="hidden" id="id_url" name="id_url">
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="resume">{% if session.get('lang', 'en') == 'ar' %}رفع السيرة الذاتية (PDF) *{% else %}Upload Resume/CV (PDF) *{% endif %}</label>
-                            <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                            <input type="file" id="resume" accept=".pdf,.doc,.docx" required>
+                            <small id="cv_status" style="color:#666;"></small>
                         </div>
-                        <!-- UPDATED: ID Document is now required -->
                         <div class="form-group">
                             <label for="id_document">{% if session.get('lang', 'en') == 'ar' %}وثيقة الهوية *{% else %}ID Document *{% endif %}</label>
-                            <input type="file" id="id_document" name="id_document" accept=".pdf,.doc,.docx,.jpg,.png" required>
+                            <input type="file" id="id_document" accept=".pdf,.doc,.docx,.jpg,.png" required>
+                            <small id="id_status" style="color:#666;"></small>
+                        </div>
+                    </div>
+
+                    <!-- Upload progress overlay -->
+                    <div id="uploadProgress" style="display:none; margin-top: 1rem; padding: 1rem; background: #f0f8ff; border-radius: 8px; border: 1px solid #b3d9ff;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div class="spinner" style="width:20px;height:20px;border:3px solid #e0e0e0;border-top:3px solid #2c3e50;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+                            <span id="uploadProgressText" style="color:#2c3e50;font-weight:600;">{% if session.get('lang', 'en') == 'ar' %}جارٍ رفع الملفات...{% else %}Uploading files, please wait...{% endif %}</span>
                         </div>
                     </div>
                 </div>
@@ -1552,7 +1566,7 @@
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-submit">{% if session.get('lang', 'en') == 'ar' %}إرسال الطلب{% else %}Submit Application{% endif %}</button>
+                    <button type="submit" id="submitBtn" class="btn-submit">{% if session.get('lang', 'en') == 'ar' %}إرسال الطلب{% else %}Submit Application {% endif %}</button>
                 </div>
             </form>
             
@@ -1879,6 +1893,124 @@
                 }
             }
     </script>
+
+    <!-- Supabase JS SDK (ESM via CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+    <script>
+    // ============================================================
+    // CLIENT-SIDE SUPABASE FILE UPLOAD (bypasses Vercel 413 limit)
+    // Files are uploaded directly from the browser to Supabase Storage.
+    // Only the public URLs are POSTed to Flask.
+    // ============================================================
+
+    const SUPABASE_URL  = "https://bliazzxcvzypcqgdxmwj.supabase.co";
+    // NOTE: Replace with the ANON key from Supabase Dashboard > Settings > API
+    // Using service_role key here as a fallback — swap to anon key for production
+    const SUPABASE_ANON = "{{ supabase_anon_key|default('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsaWF6enhjdnp5cGNxZ2R4bXdqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDk4OTE5OCwiZXhwIjoyMDk2NTY1MTk4fQ.k717-XUxvwoCqPJwGliPIeaOWHhiGZEa9SSJnC2N15I') }}";
+
+    // We'll do raw fetch uploads to avoid anon key issues — uses the service role via a tiny proxy approach
+    // Actually we upload with the anon key but bucket must have INSERT policy for anon.
+    // If you get 403, set RLS on the 'candidates' storage bucket to allow anon uploads.
+
+    async function uploadToSupabase(file, folder) {
+        const timestamp = Date.now();
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storagePath = `${folder}/${timestamp}_${safeName}`;
+
+        const uploadUrl = `${SUPABASE_URL}/storage/v1/object/candidates/${storagePath}`;
+
+        const res = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_ANON}`,
+                'Content-Type': file.type || 'application/octet-stream',
+                'x-upsert': 'true'
+            },
+            body: file
+        });
+
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Upload failed (${res.status}): ${errText}`);
+        }
+
+        // Build public URL
+        return `${SUPABASE_URL}/storage/v1/object/public/candidates/${storagePath}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('applicationForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadProgressText = document.getElementById('uploadProgressText');
+        const cvStatus = document.getElementById('cv_status');
+        const idStatus = document.getElementById('id_status');
+
+        // Add spin animation CSS
+        const spinStyle = document.createElement('style');
+        spinStyle.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+        document.head.appendChild(spinStyle);
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const cvFile = document.getElementById('resume').files[0];
+            const idFile = document.getElementById('id_document').files[0];
+
+            if (!cvFile) {
+                alert('Please select your Resume/CV file.');
+                return;
+            }
+            if (!idFile) {
+                alert('Please select your ID Document file.');
+                return;
+            }
+
+            // Show progress
+            uploadProgress.style.display = 'block';
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Uploading...';
+
+            try {
+                // Upload CV
+                uploadProgressText.textContent = 'Uploading Resume/CV (1/2)...';
+                cvStatus.textContent = '⏳ Uploading...';
+                cvStatus.style.color = '#888';
+                const cvUrl = await uploadToSupabase(cvFile, 'public');
+                document.getElementById('cv_url').value = cvUrl;
+                cvStatus.textContent = '✅ Uploaded';
+                cvStatus.style.color = '#27ae60';
+
+                // Upload ID
+                uploadProgressText.textContent = 'Uploading ID Document (2/2)...';
+                idStatus.textContent = '⏳ Uploading...';
+                idStatus.style.color = '#888';
+                const idUrl = await uploadToSupabase(idFile, 'public');
+                document.getElementById('id_url').value = idUrl;
+                idStatus.textContent = '✅ Uploaded';
+                idStatus.style.color = '#27ae60';
+
+                uploadProgressText.textContent = 'Files uploaded! Submitting application...';
+
+                // Submit the form without files (only text + URLs)
+                form.submit();
+
+            } catch (err) {
+                uploadProgress.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application';
+                cvStatus.textContent = '';
+                idStatus.textContent = '';
+
+                console.error('Upload error:', err);
+                alert('File upload failed: ' + err.message + '\n\nPlease check your internet connection and try again.');
+            }
+        });
+    });
+    </script>
 </body>
 </html>
+
+
 

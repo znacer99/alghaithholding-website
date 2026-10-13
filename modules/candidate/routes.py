@@ -78,15 +78,17 @@ def public_apply():
         except Exception as e:
             current_app.logger.error("ReCAPTCHA ERROR: %s", e)
 
-    # ----- Validate files -----
-    cv_file = request.files.get("resume")
-    id_file = request.files.get("id_document")
+    # ----- Accept pre-uploaded Supabase URLs (client-side upload) -----
+    # Files are uploaded directly from browser to Supabase Storage to bypass
+    # Vercel's 4.5MB serverless function payload limit (413 error).
+    cv_url = request.form.get("cv_url", "").strip()
+    id_url = request.form.get("id_url", "").strip()
 
-    if not cv_file or cv_file.filename == "":
+    if not cv_url:
         flash("Resume/CV file is required.", "error")
         return redirect(url_for("landing.landing"))
 
-    if not id_file or id_file.filename == "":
+    if not id_url:
         flash("ID document is required.", "error")
         return redirect(url_for("landing.landing"))
 
@@ -101,10 +103,10 @@ def public_apply():
     try:
         candidate_services.save_candidate(
             request.form,
-            cv_file=cv_file,
-            id_file=id_file
+            cv_url=cv_url,
+            id_url=id_url
         )
-        current_app.logger.info("Candidate saved successfully.")
+        current_app.logger.info("Candidate saved successfully via Supabase direct-upload.")
     except Exception as e:
         current_app.logger.error("DB Save Error: %s", e)
         flash("Internal error saving your application.", "error")
